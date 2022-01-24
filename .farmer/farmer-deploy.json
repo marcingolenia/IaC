@@ -1,0 +1,214 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "outputs": {
+    "vault-uri": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', 'DemoVault')).vaultUri]"
+    }
+  },
+  "parameters": {
+    "password-for-postgres": {
+      "type": "securestring"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-02-01",
+      "location": "northeurope",
+      "name": "demoPlan",
+      "properties": {
+        "name": "demoPlan",
+        "perSiteScaling": false,
+        "reserved": false
+      },
+      "sku": {
+        "capacity": 1,
+        "name": "F1",
+        "size": "0",
+        "tier": "Free"
+      },
+      "tags": {},
+      "type": "Microsoft.Web/serverfarms"
+    },
+    {
+      "apiVersion": "2014-04-01",
+      "kind": "web",
+      "location": "northeurope",
+      "name": "demoInsights",
+      "properties": {
+        "Application_Type": "web",
+        "DisableIpMasking": false,
+        "SamplingPercentage": 100,
+        "name": "demoInsights"
+      },
+      "tags": {},
+      "type": "Microsoft.Insights/components"
+    },
+    {
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', 'demoWebApp')]"
+      ],
+      "location": "northeurope",
+      "name": "demoWebApp/Microsoft.AspNetCore.AzureAppServices.SiteExtension",
+      "type": "Microsoft.Web/sites/siteextensions"
+    },
+    {
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', 'demoInsights')]",
+        "[resourceId('Microsoft.Web/serverfarms', 'demoPlan')]"
+      ],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "kind": "app",
+      "location": "northeurope",
+      "name": "demoWebApp",
+      "properties": {
+        "httpsOnly": false,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'demoPlan')]",
+        "siteConfig": {
+          "alwaysOn": true,
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', 'demoInsights'), '2014-04-01').InstrumentationKey]"
+            },
+            {
+              "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
+              "value": "1.0.0"
+            },
+            {
+              "name": "APPINSIGHTS_SNAPSHOTFEATURE_VERSION",
+              "value": "1.0.0"
+            },
+            {
+              "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "DiagnosticServices_EXTENSION_VERSION",
+              "value": "~3"
+            },
+            {
+              "name": "InstrumentationEngine_EXTENSION_VERSION",
+              "value": "~1"
+            },
+            {
+              "name": "SnapshotDebugger_EXTENSION_VERSION",
+              "value": "~1"
+            },
+            {
+              "name": "XDT_MicrosoftApplicationInsights_BaseExtensions",
+              "value": "~1"
+            },
+            {
+              "name": "XDT_MicrosoftApplicationInsights_Mode",
+              "value": "recommended"
+            }
+          ],
+          "connectionStrings": [],
+          "metadata": [
+            {
+              "name": "CURRENT_STACK",
+              "value": "dotnetcore"
+            }
+          ]
+        }
+      },
+      "tags": {},
+      "type": "Microsoft.Web/sites"
+    },
+    {
+      "apiVersion": "2019-09-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', 'demoWebApp')]"
+      ],
+      "location": "northeurope",
+      "name": "DemoVault",
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "[reference(resourceId('Microsoft.Web/sites', 'demoWebApp'), '2020-06-01', 'full').identity.principalId]",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "get",
+                "list"
+              ],
+              "storage": []
+            },
+            "tenantId": "[subscription().tenantid]"
+          }
+        ],
+        "enabledForTemplateDeployment": true,
+        "networkAcls": {
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantid]"
+      },
+      "tags": {},
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "apiVersion": "2017-12-01",
+      "location": "northeurope",
+      "name": "postgres",
+      "properties": {
+        "administratorLogin": "dbadmin",
+        "administratorLoginPassword": "[parameters('password-for-postgres')]",
+        "storageProfile": {
+          "backupRetentionDays": 7,
+          "geoRedundantBackup": "Disabled",
+          "storageAutoGrow": "Enabled",
+          "storageMB": 51200
+        },
+        "version": "11"
+      },
+      "sku": {
+        "capacity": 4,
+        "family": "Gen5",
+        "name": "GP_Gen5_4",
+        "size": "51200",
+        "tier": "GeneralPurpose"
+      },
+      "tags": {
+        "displayName": "postgres"
+      },
+      "type": "Microsoft.DBforPostgreSQL/servers"
+    },
+    {
+      "apiVersion": "2017-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', 'postgres')]"
+      ],
+      "name": "postgres/demo_db",
+      "properties": {
+        "charset": "UTF8",
+        "collation": "English_United States.1252"
+      },
+      "type": "Microsoft.DBforPostgreSQL/servers/databases"
+    },
+    {
+      "apiVersion": "2017-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', 'postgres')]"
+      ],
+      "location": "northeurope",
+      "name": "postgres/allow-azure-services",
+      "properties": {
+        "endIpAddress": "0.0.0.0",
+        "startIpAddress": "0.0.0.0"
+      },
+      "type": "Microsoft.DBforPostgreSQL/servers/firewallrules"
+    }
+  ]
+}
