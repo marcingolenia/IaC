@@ -4,25 +4,29 @@ open Farmer
 open Farmer.Builders
 open Farmer.PostgreSQL
 
+let dbPass = System.Guid.NewGuid()
+                .ToString()
+                .Replace("-", "")
+
 let plan = servicePlan {
-    name "demoPlan"
+    name "rolnikDemoPlan"
 }
 
 let ai = appInsights {
-    name "demoInsights"
+    name "rolnikDemoInsights"
 }
 
 let webapp = webApp {
-    name "demoWebApp"
+    name "rolnikDemoWebApp"
     sku WebApp.Sku.Free
     link_to_service_plan plan
     link_to_app_insights ai
     system_identity
-    always_on
 }
 
 let vault = keyVault {
-    name "DemoVault"
+    name "rolnikDemoVault"
+    add_secret "simpleSecret"
     add_access_policies [
         AccessPolicy.create webapp.SystemIdentity
     ]
@@ -30,11 +34,11 @@ let vault = keyVault {
 
 let postgres = postgreSQL {
     admin_username "dbadmin"
-    name "postgres"
+    name "rolnik-postgres"
     capacity 4<VCores>
     storage_size 50<Gb>
     tier GeneralPurpose
-    add_database "demo_db"
+    add_database "rolnikDb"
     enable_azure_firewall
 }
 
@@ -49,4 +53,4 @@ let template = arm {
 }
 
 Deploy.setSubscription (System.Guid.Parse "a4e0808e-ccc1-41c0-b84f-0b683b57dbde")
-template |> Deploy.execute "rg-farmer" [("password-for-postgres", "admin123!admin123")]
+template |> Deploy.execute "rg-rolnik" [("password-for-rolnik-postgres", dbPass)]

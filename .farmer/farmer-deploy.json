@@ -4,11 +4,11 @@
   "outputs": {
     "vault-uri": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', 'DemoVault')).vaultUri]"
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', 'rolnikDemoVault')).vaultUri]"
     }
   },
   "parameters": {
-    "password-for-postgres": {
+    "password-for-rolnik-postgres": {
       "type": "securestring"
     }
   },
@@ -16,9 +16,9 @@
     {
       "apiVersion": "2018-02-01",
       "location": "northeurope",
-      "name": "demoPlan",
+      "name": "rolnikDemoPlan",
       "properties": {
-        "name": "demoPlan",
+        "name": "rolnikDemoPlan",
         "perSiteScaling": false,
         "reserved": false
       },
@@ -35,12 +35,12 @@
       "apiVersion": "2014-04-01",
       "kind": "web",
       "location": "northeurope",
-      "name": "demoInsights",
+      "name": "rolnikDemoInsights",
       "properties": {
         "Application_Type": "web",
         "DisableIpMasking": false,
         "SamplingPercentage": 100,
-        "name": "demoInsights"
+        "name": "rolnikDemoInsights"
       },
       "tags": {},
       "type": "Microsoft.Insights/components"
@@ -48,33 +48,33 @@
     {
       "apiVersion": "2020-06-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', 'demoWebApp')]"
+        "[resourceId('Microsoft.Web/sites', 'rolnikDemoWebApp')]"
       ],
       "location": "northeurope",
-      "name": "demoWebApp/Microsoft.AspNetCore.AzureAppServices.SiteExtension",
+      "name": "rolnikDemoWebApp/Microsoft.AspNetCore.AzureAppServices.SiteExtension",
       "type": "Microsoft.Web/sites/siteextensions"
     },
     {
       "apiVersion": "2020-06-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/components', 'demoInsights')]",
-        "[resourceId('Microsoft.Web/serverfarms', 'demoPlan')]"
+        "[resourceId('Microsoft.Insights/components', 'rolnikDemoInsights')]",
+        "[resourceId('Microsoft.Web/serverfarms', 'rolnikDemoPlan')]"
       ],
       "identity": {
         "type": "SystemAssigned"
       },
       "kind": "app",
       "location": "northeurope",
-      "name": "demoWebApp",
+      "name": "rolnikDemoWebApp",
       "properties": {
         "httpsOnly": false,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'demoPlan')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'rolnikDemoPlan')]",
         "siteConfig": {
-          "alwaysOn": true,
+          "alwaysOn": false,
           "appSettings": [
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components', 'demoInsights'), '2014-04-01').InstrumentationKey]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', 'rolnikDemoInsights'), '2014-04-01').InstrumentationKey]"
             },
             {
               "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
@@ -124,14 +124,14 @@
     {
       "apiVersion": "2019-09-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', 'demoWebApp')]"
+        "[resourceId('Microsoft.Web/sites', 'rolnikDemoWebApp')]"
       ],
       "location": "northeurope",
-      "name": "DemoVault",
+      "name": "rolnikDemoVault",
       "properties": {
         "accessPolicies": [
           {
-            "objectId": "[reference(resourceId('Microsoft.Web/sites', 'demoWebApp'), '2020-06-01', 'full').identity.principalId]",
+            "objectId": "[reference(resourceId('Microsoft.Web/sites', 'rolnikDemoWebApp'), '2020-06-01', 'full').identity.principalId]",
             "permissions": {
               "certificates": [],
               "keys": [],
@@ -161,10 +161,10 @@
     {
       "apiVersion": "2017-12-01",
       "location": "northeurope",
-      "name": "postgres",
+      "name": "rolnik-postgres",
       "properties": {
         "administratorLogin": "dbadmin",
-        "administratorLoginPassword": "[parameters('password-for-postgres')]",
+        "administratorLoginPassword": "[parameters('password-for-rolnik-postgres')]",
         "storageProfile": {
           "backupRetentionDays": 7,
           "geoRedundantBackup": "Disabled",
@@ -181,16 +181,16 @@
         "tier": "GeneralPurpose"
       },
       "tags": {
-        "displayName": "postgres"
+        "displayName": "rolnik-postgres"
       },
       "type": "Microsoft.DBforPostgreSQL/servers"
     },
     {
       "apiVersion": "2017-12-01",
       "dependsOn": [
-        "[resourceId('Microsoft.DBforPostgreSQL/servers', 'postgres')]"
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', 'rolnik-postgres')]"
       ],
-      "name": "postgres/demo_db",
+      "name": "rolnik-postgres/rolnikDb",
       "properties": {
         "charset": "UTF8",
         "collation": "English_United States.1252"
@@ -200,10 +200,10 @@
     {
       "apiVersion": "2017-12-01",
       "dependsOn": [
-        "[resourceId('Microsoft.DBforPostgreSQL/servers', 'postgres')]"
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', 'rolnik-postgres')]"
       ],
       "location": "northeurope",
-      "name": "postgres/allow-azure-services",
+      "name": "rolnik-postgres/allow-azure-services",
       "properties": {
         "endIpAddress": "0.0.0.0",
         "startIpAddress": "0.0.0.0"
