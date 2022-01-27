@@ -108,6 +108,10 @@ resource webApplication 'Microsoft.Web/sites@2018-11-01' = {
         {
           name: 'DOCKER_CUSTOM_IMAGE_NAME'
           value: imageInDockerHub
+        }
+        {
+          name:  'DOCKER_REGISTRY_SERVER_URL' 
+          value: 'https://index.docker.io'
         }    
       ]
       linuxFxVersion: 'DOCKER|${imageInDockerHub}'
