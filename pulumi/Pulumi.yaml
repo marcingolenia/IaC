@@ -1,0 +1,3 @@
+name: pulumu
+runtime: dotnet
+description: Infrastructure as Code - tools comparison
