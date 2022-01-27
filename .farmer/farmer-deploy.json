@@ -147,7 +147,30 @@
             "tenantId": "[subscription().tenantid]"
           },
           {
-            "objectId": "00000000-0000-0000-0000-000000000000",
+            "objectId": "4cfd10ca-790f-4b44-ab69-9c7f7ca187f1",
+            "permissions": {
+              "certificates": [
+                "list"
+              ],
+              "keys": [
+                "list"
+              ],
+              "secrets": [
+                "backup",
+                "delete",
+                "get",
+                "list",
+                "purge",
+                "recover",
+                "restore",
+                "set"
+              ],
+              "storage": []
+            },
+            "tenantId": "[subscription().tenantid]"
+          },
+          {
+            "objectId": "3ba03f50-d614-431b-997e-27a9fa5274db",
             "permissions": {
               "certificates": [
                 "list"
