@@ -7,7 +7,7 @@ open System
 
 let dbPass = Guid.NewGuid()
                 .ToString()
-                .Replace("-", "")
+                .Replace("-", "") + "!#"
 
 let plan = servicePlan {
     name "rolnikDemoPlan"
@@ -25,10 +25,17 @@ let webapp = webApp {
     system_identity
 }
 
-let vaultPolicy =
+let mgPolicy =
     accessPolicy {
-        object_id Guid.Empty
-        application_id Guid.Empty
+        object_id "4cfd10ca-790f-4b44-ab69-9c7f7ca187f1"
+        certificate_permissions [ KeyVault.Certificate.List ]
+        secret_permissions KeyVault.Secret.All
+        key_permissions [ KeyVault.Key.List ]
+    }
+
+let msPolicy =
+    accessPolicy {
+        object_id "3ba03f50-d614-431b-997e-27a9fa5274db"
         certificate_permissions [ KeyVault.Certificate.List ]
         secret_permissions KeyVault.Secret.All
         key_permissions [ KeyVault.Key.List ]
@@ -36,10 +43,11 @@ let vaultPolicy =
 
 let vault = keyVault {
     name "rolnikDemoVault"
-    add_access_policy vaultPolicy
     add_secret "simpleSecret"
     add_access_policies [
         AccessPolicy.create webapp.SystemIdentity
+        mgPolicy
+        msPolicy
     ]
 }
 
@@ -64,4 +72,7 @@ let template = arm {
 }
 
 Deploy.setSubscription (System.Guid.Parse "a4e0808e-ccc1-41c0-b84f-0b683b57dbde")
-template |> Deploy.execute "rg-rolnik" [("password-for-rolnik-postgres", dbPass)]
+template |> Deploy.execute "rg-rolnik" [
+    ("password-for-rolnik-postgres", dbPass)
+    ("simpleSecret", dbPass)
+    ]

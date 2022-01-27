@@ -10,6 +10,9 @@
   "parameters": {
     "password-for-rolnik-postgres": {
       "type": "securestring"
+    },
+    "simpleSecret": {
+      "type": "securestring"
     }
   },
   "resources": [
@@ -142,6 +145,29 @@
               "storage": []
             },
             "tenantId": "[subscription().tenantid]"
+          },
+          {
+            "objectId": "00000000-0000-0000-0000-000000000000",
+            "permissions": {
+              "certificates": [
+                "list"
+              ],
+              "keys": [
+                "list"
+              ],
+              "secrets": [
+                "backup",
+                "delete",
+                "get",
+                "list",
+                "purge",
+                "recover",
+                "restore",
+                "set"
+              ],
+              "storage": []
+            },
+            "tenantId": "[subscription().tenantid]"
           }
         ],
         "enabledForTemplateDeployment": true,
@@ -157,6 +183,20 @@
       },
       "tags": {},
       "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "apiVersion": "2019-09-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', 'rolnikDemoVault')]"
+      ],
+      "location": "northeurope",
+      "name": "rolnikDemoVault/simpleSecret",
+      "properties": {
+        "attributes": {},
+        "value": "[parameters('simpleSecret')]"
+      },
+      "tags": {},
+      "type": "Microsoft.KeyVault/vaults/secrets"
     },
     {
       "apiVersion": "2017-12-01",
