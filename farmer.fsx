@@ -3,8 +3,9 @@
 open Farmer
 open Farmer.Builders
 open Farmer.PostgreSQL
+open System 
 
-let dbPass = System.Guid.NewGuid()
+let dbPass = Guid.NewGuid()
                 .ToString()
                 .Replace("-", "")
 
@@ -24,8 +25,18 @@ let webapp = webApp {
     system_identity
 }
 
+let vaultPolicy =
+    accessPolicy {
+        object_id Guid.Empty
+        application_id Guid.Empty
+        certificate_permissions [ KeyVault.Certificate.List ]
+        secret_permissions KeyVault.Secret.All
+        key_permissions [ KeyVault.Key.List ]
+    }
+
 let vault = keyVault {
     name "rolnikDemoVault"
+    add_access_policy vaultPolicy
     add_secret "simpleSecret"
     add_access_policies [
         AccessPolicy.create webapp.SystemIdentity
