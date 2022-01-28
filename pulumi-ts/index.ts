@@ -45,6 +45,14 @@ const vault = new az.keyvault.Vault("vault", {
     vaultName: "pulik-vault",
 })
 
+const secret = new az.keyvault.Secret("pulik-secret", {
+    properties: {
+        value: "secret-value",
+    },
+    resourceGroupName: resourceGroup.name,
+    secretName: "pulik-secret-name",
+    vaultName: vault.name,
+});
 
 const pulikAi = new az.insights.Component("pulik-ai", {
     resourceGroupName: resourceGroup.name,
