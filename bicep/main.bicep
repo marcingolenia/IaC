@@ -1,7 +1,7 @@
 var location= 'northeurope'
 var pgAdminPassword='pgAdminP@ssword4321'
 
-var imageInDockerHub = 'microsoft/azure-appservices-go-quickstart'
+var imageInDockerHub = 'appsvcsample/python-helloworld:latest'
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
   name: 'BicepIaCPocUMI'

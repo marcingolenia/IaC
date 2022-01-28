@@ -125,10 +125,15 @@ let createWebApp (resourceGroupName: Output<string>) (webPlanId: Output<string>)
     let name = "PulumiIaCPocWebApp"
 
     let imageInDockerHub =
-        "microsoft/azure-appservices-go-quickstart"
+        "appsvcsample/python-helloworld:latest"
+
+    let dockerRegistryAppSetting = Web.Inputs.NameValuePairArgs(Name = "DOCKER_REGISTRY_SERVER_URL", Value= "https://index.docker.io")
+
+    let appSettings : InputList<Web.Inputs.NameValuePairArgs> = InputList<Web.Inputs.NameValuePairArgs>()
+    appSettings.Add dockerRegistryAppSetting
 
     let siteConfigArgs =
-        Web.Inputs.SiteConfigArgs(AlwaysOn = true, LinuxFxVersion = $"DOCKER|{imageInDockerHub}")
+        Web.Inputs.SiteConfigArgs(AlwaysOn = true, LinuxFxVersion = $"DOCKER|{imageInDockerHub}", AppSettings = appSettings)
 
     let umiName = Output.Format($"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{managedIdentityObjectName}")
 
