@@ -18,21 +18,16 @@ let umiPolicy =
         key_permissions [ KeyVault.Key.List ]
     }
 
-
 let vault =
     keyVault {
         name "FarmerIaCPocKV"
         sku KeyVault.Sku.Standard
-
         enable_disk_encryption_access
         enable_resource_manager_access
         enable_soft_delete_with_purge_protection
-
         add_access_policy umiPolicy
-
         add_secret "pgAdminPassword"
     }
-
 
 let postgres = postgreSQL {
     admin_username "farmerPgAdmin"
@@ -43,8 +38,6 @@ let postgres = postgreSQL {
     backup_retention 7<Days>
     disable_geo_redundant_backup
 }
-
-
 
 let dbPass = Guid.NewGuid()
                 .ToString()
