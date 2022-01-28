@@ -23,11 +23,9 @@ const vault = new az.keyvault.Vault("vault", {
                     "get",
                     "list",
                     "set",
-                    "delete",
                     "backup",
                     "restore",
-                    "recover",
-                    "purge",
+                    "recover"
                 ],
             },
             tenantId: "00000000-0000-0000-0000-000000000000",
