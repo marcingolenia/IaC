@@ -19,7 +19,7 @@ const userAssignedIdentity = new az.managedidentity.UserAssignedIdentity("pulik-
     resourceName: "pulik-identity"
 })
 
-const vault = new az.keyvault.Vault("vault", {
+const vault = new az.keyvault.Vault("pulik-vault12", {
     location: "westeurope",
     properties: {
         accessPolicies: [{
@@ -44,7 +44,7 @@ const vault = new az.keyvault.Vault("vault", {
         tenantId: userAssignedIdentity.tenantId,
     },
     resourceGroupName: resourceGroup.name,
-    vaultName: "pulik-vault",
+    vaultName: "pulik-vault12",
 })
 
 const secret = new az.keyvault.Secret("pulik-secret", {
@@ -79,7 +79,7 @@ const pulikApp = new az.web.WebApp("pulik-app", {
 const server = new az.dbforpostgresql.Server("pulik-server", {
     location: "westeurope",
     properties: {
-        administratorLogin: "pulik-admin",
+        administratorLogin: "pulikAdmin",
         administratorLoginPassword: "SztrongPa$$sword",
         createMode: "Default",
         minimalTlsVersion: "TLS1_2",
